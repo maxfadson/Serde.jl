@@ -438,7 +438,7 @@ end
 
 """
     Serde.nulltype(::Type{T}) -> nothing
-    
+
 Defines behavior when the value for a field of type `T` is empty (according to [`Serde.isempty`](@ref)) or not specified.
 Supports user overriding for custom types.
 Initially, for all types, it is set to `nothing` (in case of type `Missing`, it returns the `missing` value).

@@ -34,15 +34,19 @@ escape_query(c::Char) = string('%', uppercase(string(Int(c), base = 16, pad = 2)
 escape_query(bytes::Vector{UInt8}) = bytes
 
 function escape_query(str::AbstractString)
-    escaped = ""
+    escaped = String[]
     for c in utf8_chars(str)
-        escaped *= issafe(c) ? c : escape_query(c)
+        push!(escaped, string(issafe(c) ? c : escape_query(c)))
     end
-    return escaped
+    return join(escaped)
 end
 
 function make_pair(k::String, v::String, escape::Bool = true)::Vector{String}
-    return escape ? [escape_query(k) * "=" * escape_query(v)] : [k * "=" * v]
+    return if escape
+        [escape_query(k) * "=" * escape_query(v)]
+    else
+        [k * "=" * v]
+    end
 end
 
 function ser_pair(

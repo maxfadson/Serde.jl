@@ -3,17 +3,9 @@ using Serde
 
 DocMeta.setdocmeta!(Serde, :DocTestSetup, :(using Serde); recursive = true)
 
-makedocs(;
-    modules=[Serde],
-    repo="https://github.com/bhftbootcamp/Serde.jl/blob/{commit}{path}#{line}",
-    sitename="Serde.jl",
-    format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://bhftbootcamp.github.io/Serde.jl",
-        edit_link="master",
-        assets=String[],
-        repolink="https://github.com/bhftbootcamp/Serde.jl.git"
-    ),
+makedocs(
+    modules = [Serde],
+    sitename = "Serde.jl",
     pages = [
         "Home" => "index.md",
         "API Reference" => [
@@ -29,10 +21,13 @@ makedocs(;
             "pages/extended_de.md",
         ]
     ],
-    checkdocs = :missing_docs,
-)
-
-deploydocs(;
-    repo="github.com/bhftbootcamp/Serde.jl",
-    devbranch="master",
+    repo = Documenter.Remotes.GitLab("bhft/Serde.jl"),
+    format = Documenter.HTML(;
+        prettyurls = get(ENV, "CI", "false") == "true",
+        canonical = "https://bhft.gitlab.io/Serde.jl",
+        assets = [],
+        sidebar_sitename = true,
+        repolink = "https://gitlab.com/bhft/Serde.jl.git",
+    ),
+    checkdocs = :missing_docs
 )
