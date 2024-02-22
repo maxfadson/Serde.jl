@@ -115,12 +115,7 @@ function create_complex_vector(key, val::AbstractVector{T}; parent_key::String =
         if !issimple(v)
             push!(
                 buf,
-                "\n" *
-                indent(level + 1) *
-                "[[" *
-                key *
-                "]]" *
-                "\n" *
+                "\n" * indent(level + 1) * "[[" * key * "]]" * "\n" *
                 join([toml_pair(k1, v1; parent_key = key, level = level + 1, kw...) for (k1, v1) in toml_pairs(v; kw...)]),
             )
         else
