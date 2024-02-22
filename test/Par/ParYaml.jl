@@ -16,13 +16,10 @@
           - string: baz
             braces: "{{ dd }}"
         """
-        exp_obj = Dict{String,Any}(
-            "dict" => Dict{String,Any}(
-                "dict_key_2" => "dict_value_2",
-                "dict_key_1" => "dict_value_1",
-            ),
+        exp_obj = Dict(
+            "dict" => Dict("dict_key_2" => "dict_value_2", "dict_key_1" => "dict_value_1"),
             "string" => "qwerty",
-            "list" => Dict{String,Any}[
+            "list" => Dict[
                 Dict("int" => 163, "string" => "foo", "quoted" => "bar", "float" => 1.63),
                 Dict("string" => "baz", "braces" => "{{ dd }}"),
             ],
@@ -42,12 +39,12 @@
             on multiple lines
         aliasTest: *myAnchor
         """
-        exp_obj = Dict{String,Any}(
-            "anchorTest" => Dict{String,Any}(
+        exp_obj = Dict(
+            "anchorTest" => Dict(
                 "toMultiline" => "this text will be considered\non multiple lines\n",
                 "toSingleLine" => "this text will be considered on a single line\n",
             ),
-            "aliasTest" => Dict{String,Any}(
+            "aliasTest" => Dict(
                 "toMultiline" => "this text will be considered\non multiple lines\n",
                 "toSingleLine" => "this text will be considered on a single line\n",
             ),
@@ -66,7 +63,7 @@
         boolOn: !!bool On
         boolOff: !!bool Off
         """
-        exp_obj = Dict{String,Any}(
+        exp_obj = Dict(
             "boolNo" => false,
             "boolTrue2" => true,
             "boolOff" => false,
@@ -82,5 +79,14 @@
     @testset "Case №4: Exceptions tests" begin
         exp_str = "vector: [3,,4]"
         @test_throws Serde.ParYaml.YamlSyntaxError Serde.parse_yaml(exp_str)
+    end
+
+    @testset "Case №5: Different Dict type" begin
+        exp_str = """
+        foo: 163
+        bar: true
+        """
+        exp_obj = IdDict("foo" => 163, "bar" => true)
+        @test Serde.ParYaml.parse_yaml(exp_str; dict_type = IdDict) == exp_obj
     end
 end
