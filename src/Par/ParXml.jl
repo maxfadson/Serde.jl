@@ -98,11 +98,7 @@ Dict{String, Any} with 5 entries:
 """
 function parse_xml end
 
-function parse_xml(
-    x::S;
-    dict_type::Type{D} = Dict{String,Any},
-    kw...,
-) where {S<:AbstractString,D<:AbstractDict}
+function parse_xml(x::S; dict_type::Type{D} = Dict{String,Any}, kw...) where {S<:AbstractString,D<:AbstractDict}
     try
         _xml2dict(x; dict_type = dict_type, kw...)
     catch e
