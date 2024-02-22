@@ -108,8 +108,8 @@ title,start_date,end_date
 
 # Deserialize CSV to a vector of JuliaCon objects
 julia> juliacon = deser_csv(JuliaCon, csv)
- 1-element Vector{JuliaCon}:
-  JuliaCon("JuliaCon 2024", Date("2024-07-09"), Date("2024-07-13"))
+1-element Vector{JuliaCon}:
+ JuliaCon("JuliaCon 2024", Date("2024-07-09"), Date("2024-07-13"))
 
 # YAML deserialization example
 yaml = """
