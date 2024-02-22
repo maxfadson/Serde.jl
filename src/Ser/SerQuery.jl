@@ -23,10 +23,7 @@ _bytes(s::Vector{UInt8}) = s
 utf8_chars(str::AbstractString) = (Char(c) for c in _bytes(str))
 
 function issafe(c::Char)::Bool
-    return c == '-' ||
-           c == '.' ||
-           c == '_' ||
-           (isascii(c) && (isletter(c) || isnumeric(c)))
+    return c == '-' || c == '.' || c == '_' || (isascii(c) && (isletter(c) || isnumeric(c)))
 end
 
 escape_query(v::Any) = escape_query(string(v))
@@ -34,15 +31,19 @@ escape_query(c::Char) = string('%', uppercase(string(Int(c), base = 16, pad = 2)
 escape_query(bytes::Vector{UInt8}) = bytes
 
 function escape_query(str::AbstractString)
-    escaped = ""
+    escaped = String[]
     for c in utf8_chars(str)
-        escaped *= issafe(c) ? c : escape_query(c)
+        push!(escaped, string(issafe(c) ? c : escape_query(c)))
     end
-    return escaped
+    return join(escaped)
 end
 
 function make_pair(k::String, v::String, escape::Bool = true)::Vector{String}
-    return escape ? [escape_query(k) * "=" * escape_query(v)] : [k * "=" * v]
+    return if escape
+        [escape_query(k) * "=" * escape_query(v)]
+    else
+        [k * "=" * v]
+    end
 end
 
 function ser_pair(
@@ -102,7 +103,7 @@ end
 """
     to_query(data; kw...) -> String
 
-Converts dictionary `data` (or custom type) to the query string. 
+Converts dictionary `data` (or custom type) to the query string.
 Values of `data` must be of primitive types or a vector of such.
 In case of custom data, the names of the query elements are obtained from the field names of `data`.
 
@@ -145,7 +146,10 @@ function to_query(
     escape::Bool = true,
 )::String where {T}
     kv = String[]
-    iter_query(p -> append!(kv, [make_pair(k, v, escape) for (k, v) in zip(p[1], p[2])]...), data)
+    iter_query(
+        p -> append!(kv, [make_pair(k, v, escape) for (k, v) in zip(p[1], p[2])]...),
+        data,
+    )
     return join(sort_keys ? sort!(kv) : kv, delimiter)
 end
 
