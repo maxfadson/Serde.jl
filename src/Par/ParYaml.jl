@@ -68,7 +68,7 @@ Dict{String, Any} with 6 entries:
 """
 function parse_yaml end
 
-function parse_yaml(x::S; dict_type::D = Dict{String,Any}, kw...) where {S<:AbstractString,D<:AbstractDict}
+function parse_yaml(x::S; dict_type::Type{D} = Dict{String,Any}, kw...) where {S<:AbstractString,D<:AbstractDict}
     try
         YAML.load(x; dicttype = dict_type, kw...)
     catch e
