@@ -52,76 +52,46 @@ end
 # value
 
 xml_value(val::AbstractString; _...)::String = string(val)
-
 xml_value(val::Number; _...)::String = string(isnan(val) ? "nan" : val)
-
 xml_value(val::Symbol; kw...)::String = xml_value(string(val); kw...)
-
 xml_value(val::AbstractChar; kw...)::String = xml_value(string(val); kw...)
-
 xml_value(val::Bool; _...)::String = val ? "true" : "false"
-
 xml_value(val::Enum; kw...)::String = xml_value(string(val); kw...)
-
 xml_value(val::Type; kw...)::String = xml_value(string(val); kw...)
-
 xml_value(val::Dates.TimeType; kw...)::String = xml_value(string(val); kw...)
-
-xml_value(val::Dates.DateTime; _...)::String =
-    Dates.format(val, Dates.dateformat"YYYY-mm-dd\THH:MM:SS.sss\Z")
-
+xml_value(val::Dates.DateTime; _...)::String = Dates.format(val, Dates.dateformat"YYYY-mm-dd\THH:MM:SS.sss\Z")
 xml_value(val::Dates.Time; _...)::String = Dates.format(val, Dates.dateformat"HH:MM:SS.sss")
-
 xml_value(val::Dates.Date; _...)::String = Dates.format(val, Dates.dateformat"YYYY-mm-dd")
 
 # key
 
 xml_key(val::AbstractString; _...) = val
-
 xml_key(val::Integer; _...)::String = string(val)
-
 xml_key(val::Bool; _...)::String = val ? "true" : "false"
-
 xml_key(val::AbstractChar; kw...)::String = xml_key(string(val); kw...)
-
 xml_key(val::Symbol; kw...)::String = xml_key(string(val); kw...)
 
 # pair
 
 function xml_pair(key, val::AbstractString; level::Int64, kw...)::String
-    return shift(level) *
-           "<" *
-           xml_key(key; kw...) *
-           ">" *
-           xml_value(val) *
-           "</" *
-           xml_key(key; kw...) *
-           ">" *
-           "\n"
+    return shift(level) * 
+            "<" * xml_key(key; kw...) * ">" * 
+                xml_value(val) * 
+            "</" * xml_key(key; kw...) * ">" * "\n"
 end
 
 function xml_pair(key, val::Symbol; level::Int64, kw...)::String
     return shift(level) *
-           "<" *
-           xml_key(key; kw...) *
-           ">" *
-           xml_value(val) *
-           "</" *
-           xml_key(key; kw...) *
-           ">" *
-           "\n"
+            "<" * xml_key(key; kw...) * ">" * 
+                xml_value(val) * 
+            "</" * xml_key(key; kw...) * ">" * "\n"
 end
 
 function xml_pair(key, val::Number; level::Int64, kw...)::String
-    return shift(level) *
-           "<" *
-           xml_key(key; kw...) *
-           ">" *
-           xml_value(val) *
-           "</" *
-           xml_key(key; kw...) *
-           ">" *
-           "\n"
+    return shift(level) * 
+            "<" * xml_key(key; kw...) * ">" * 
+                xml_value(val) * 
+            "</" * xml_key(key; kw...) * ">" * "\n"
 end
 
 function xml_pair(key, val::AbstractVector{T}; level::Int64, kw...)::String where {T}
@@ -129,16 +99,11 @@ function xml_pair(key, val::AbstractVector{T}; level::Int64, kw...)::String wher
     for el in val
         if issimple(el)
             push!(
-                buf,
-                shift(level) *
-                "<" *
-                xml_key(key; kw...) *
-                ">" *
-                xml_value(el) *
-                "</" *
-                xml_key(key; kw...) *
-                ">" *
-                "\n",
+                buf, 
+                shift(level) * 
+                "<" * xml_key(key; kw...) * ">" * 
+                    xml_value(el) * 
+                "</" * xml_key(key; kw...) * ">" * "\n",
             )
         else
             push!(buf, xml_pair(key, el; level = level, kw...))
@@ -151,31 +116,16 @@ function xml_pair(key, val::AbstractDict; level::Int64, kw...)::String
     tags, cont = nodes(val), content(val)
     return if isempty(tags) && isempty(cont)
         shift(level) * "<" * xml_key(key; kw...) * attribute_xml(val) * "/>" * "\n"
-    elseif isempty(cont)
-        shift(level) *
-        "<" *
-        xml_key(key; kw...) *
-        attribute_xml(val) *
-        ">" *
-        "\n" *
-        _to_xml(tags; level = level + 1) *
-        shift(level) *
-        "</" *
-        xml_key(key; kw...) *
-        ">" *
-        "\n"
+    elseif isempty(cont) 
+        shift(level) * 
+        "<" * xml_key(key; kw...) * attribute_xml(val) * ">" * 
+            "\n" * _to_xml(tags; level = level + 1) * shift(level) * 
+        "</" * xml_key(key; kw...) * ">" * "\n"
     else
         shift(level) *
-        "<" *
-        xml_key(key; kw...) *
-        attribute_xml(val) *
-        ">" *
-        cont *
-        _to_xml(tags; level = level + 1) *
-        "</" *
-        xml_key(key; kw...) *
-        ">" *
-        "\n"
+        "<" * xml_key(key; kw...) * attribute_xml(val) * ">" *
+            cont * _to_xml(tags; level = level + 1) *
+        "</" * xml_key(key; kw...) * ">" * "\n"
     end
 end
 
@@ -198,30 +148,15 @@ function xml_pair(key, val::T; level::Int64, kw...)::String where {T}
     return if isempty(tags) && isempty(cont)
         shift(level) * "<" * xml_key(key; kw...) * attribute_xml(val) * "/>" * "\n"
     elseif isempty(cont)
-        shift(level) *
-        "<" *
-        xml_key(key; kw...) *
-        attribute_xml(val) *
-        ">" *
-        "\n" *
-        _to_xml(tags; level = level + 1) *
-        shift(level) *
-        "</" *
-        xml_key(key; kw...) *
-        ">" *
-        "\n"
+        shift(level) * 
+        "<" * xml_key(key; kw...) * attribute_xml(val) * ">" * "\n" * 
+            _to_xml(tags; level = level + 1) * shift(level) * 
+        "</" * xml_key(key; kw...) * ">" * "\n"
     else
-        shift(level) *
-        "<" *
-        xml_key(key; kw...) *
-        attribute_xml(val) *
-        ">" *
-        cont *
-        _to_xml(tags; level = level + 1) *
-        "</" *
-        xml_key(key; kw...) *
-        ">" *
-        "\n"
+        shift(level) * 
+        "<" * xml_key(key; kw...) * attribute_xml(val) * ">" * 
+            cont * _to_xml(tags; level = level + 1) * 
+        "</" * xml_key(key; kw...) * ">" * "\n"
     end
 end
 

@@ -53,13 +53,7 @@ end
 
 indent(l::Int64)::String = "\n" * (INDENT^l)
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::AbstractString;
-    is_key::Bool = false,
-    kw...,
-)::Nothing
+function yaml_value!(buf::IOBuffer, f::Function, val::AbstractString; is_key::Bool = false, kw...)::Nothing
     if escape_length(val) == ncodeunits(val)
         return is_key ? print(buf, val) : print(buf, "\"", val, "\"")
     else
@@ -113,14 +107,7 @@ function yaml_value!(buf::IOBuffer, f::Function, val::Function; kw...)::Nothing
     throw("Can't serialize type 'Function' to YAML data")
 end
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::Pair;
-    l::Int64,
-    skip_lf::Bool = false,
-    kw...,
-)::Nothing
+function yaml_value!(buf::IOBuffer, f::Function, val::Pair; l::Int64, skip_lf::Bool = false, kw...)::Nothing
     print(buf, skip_lf ? "" : indent(l))
     yaml_value!(buf, f, first(val); l = l + 1, is_key = true, kw...)
     print(buf, ": ")
@@ -128,14 +115,7 @@ function yaml_value!(
     return print(buf)
 end
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::AbstractDict;
-    l::Int64,
-    skip_lf::Bool = false,
-    kw...,
-)::Nothing
+function yaml_value!(buf::IOBuffer, f::Function, val::AbstractDict; l::Int64, skip_lf::Bool = false, kw...)::Nothing
     next = iterate(val)
     print(buf, skip_lf ? "" : indent(l))
     while next !== nothing
@@ -149,14 +129,7 @@ function yaml_value!(
     return print(buf)
 end
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::AbstractVector;
-    l::Int64,
-    skip_lf::Bool = false,
-    kw...,
-)::Nothing
+function yaml_value!(buf::IOBuffer, f::Function, val::AbstractVector; l::Int64, skip_lf::Bool = false, kw...)::Nothing
     next = iterate(val)
     print(buf, skip_lf ? "" : indent(l))
     while next !== nothing
@@ -169,14 +142,7 @@ function yaml_value!(
     return print(buf)
 end
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::Tuple;
-    l::Int64,
-    skip_lf::Bool = false,
-    kw...,
-)::Nothing
+function yaml_value!(buf::IOBuffer, f::Function, val::Tuple; l::Int64, skip_lf::Bool = false, kw...)::Nothing
     next = iterate(val)
     print(buf, skip_lf ? "" : indent(l))
     while next !== nothing
@@ -189,14 +155,7 @@ function yaml_value!(
     return print(buf)
 end
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::NamedTuple;
-    l::Int64,
-    skip_lf::Bool = false,
-    kw...,
-)::Nothing
+function yaml_value!(buf::IOBuffer, f::Function, val::NamedTuple; l::Int64, skip_lf::Bool = false, kw...)::Nothing
     names = keys(val)
     print(buf, skip_lf ? "" : indent(l))
     next = iterate(names)
@@ -214,14 +173,7 @@ function yaml_value!(
     return print(buf)
 end
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::AbstractSet;
-    l::Int64,
-    skip_lf::Bool = false,
-    kw...,
-)::Nothing
+function yaml_value!(buf::IOBuffer, f::Function, val::AbstractSet; l::Int64, skip_lf::Bool = false, kw...)::Nothing
     next = iterate(val)
     print(buf, skip_lf ? "" : indent(l))
     while next !== nothing
@@ -248,14 +200,7 @@ end
 (ignore_field(::Type{T}, ::Val{x})::Bool) where {T,x} = false
 (ignore_field(::Type{T}, k::Val{x}, v::V)::Bool) where {T,x,V} = ignore_field(T, k)
 
-function yaml_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::T;
-    l::Int64,
-    skip_lf::Bool = false,
-    kw...,
-)::Nothing where {T}
+function yaml_value!(buf::IOBuffer, f::Function, val::T; l::Int64, skip_lf::Bool = false, kw...)::Nothing where {T}
     next = iterate(f(T))
     print(buf, skip_lf ? "" : indent(l))
     ignore_count::Int64 = 0
