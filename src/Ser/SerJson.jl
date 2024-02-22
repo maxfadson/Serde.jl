@@ -105,13 +105,7 @@ function json_value!(buf::IOBuffer, f::Function, val::Pair; l::Int64, kw...)::No
     return print(buf, indent(l - 1), "}")
 end
 
-function json_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::AbstractDict;
-    l::Int64,
-    kw...,
-)::Nothing
+function json_value!(buf::IOBuffer, f::Function, val::AbstractDict; l::Int64, kw...)::Nothing
     next = iterate(val)
     print(buf, "{", indent(l))
     while next !== nothing
@@ -125,13 +119,7 @@ function json_value!(
     return print(buf, indent(l - 1), "}")
 end
 
-function json_value!(
-    buf::IOBuffer,
-    f::Function,
-    val::AbstractVector;
-    l::Int64,
-    kw...,
-)::Nothing
+function json_value!(buf::IOBuffer, f::Function, val::AbstractVector; l::Int64, kw...)::Nothing
     next = iterate(val)
     print(buf, "[", indent(l))
     while next !== nothing
