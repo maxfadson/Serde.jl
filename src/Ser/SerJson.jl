@@ -13,7 +13,7 @@ const INDENT = "  "
 const NEEDESCAPE = Set{UInt8}(UInt8['"', '\\', '\b', '\f', '\n', '\r', '\t'])
 
 function escape_char(b)
-    b == UInt8('"') && return UInt8('"')
+    b == UInt8('"')  && return UInt8('"')
     b == UInt8('\\') && return UInt8('\\')
     b == UInt8('\b') && return UInt8('b')
     b == UInt8('\f') && return UInt8('f')

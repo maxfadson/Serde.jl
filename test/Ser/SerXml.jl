@@ -1,8 +1,5 @@
 # Ser/SerXml
 
-using Serde
-using Test, Dates
-
 @testset verbose = true "SerXml" begin
     @testset "Case №1: SerXml" begin
         struct BarXml1

@@ -23,7 +23,10 @@ _bytes(s::Vector{UInt8}) = s
 utf8_chars(str::AbstractString) = (Char(c) for c in _bytes(str))
 
 function issafe(c::Char)::Bool
-    return c == '-' || c == '.' || c == '_' || (isascii(c) && (isletter(c) || isnumeric(c)))
+    return c == '-' || 
+           c == '.' || 
+           c == '_' || 
+           (isascii(c) && (isletter(c) || isnumeric(c)))
 end
 
 escape_query(v::Any) = escape_query(string(v))
