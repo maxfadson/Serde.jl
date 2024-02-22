@@ -2,7 +2,7 @@
 
 The latest version of this file can be found at the master branch of the [Serde.jl](https://bhftbootcamp.github.io/Serde.jl) repository.
 
-### 0.2.2 (2023-23-05) ([merge request]())
+### 0.2.2 (2024-22-02) ([merge request]())
 
 #### Added (1 change)
 
