@@ -59,5 +59,5 @@ function Serde.SerYaml.ser_type(::Type{JuliaCon}, v::Date)
 end
 
 #  Serialize the JuliaCon instance to YAML and print it
-jo_yaml(juliacon) |> print
+to_yaml(juliacon) |> print
 ```
