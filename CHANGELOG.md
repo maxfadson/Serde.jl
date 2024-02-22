@@ -1,17 +1,17 @@
-## Serde.jl changelog
+# Serde.jl Changelog
 
-The latest version of this file can be found at the master branch of the [Serde.jl](https://bhftbootcamp.github.io/Serde.jl) repository.
+The latest version of this file can be found at the master branch of the [Serde.jl repository](https://bhftbootcamp.github.io/Serde.jl).
 
-### 2.0.0 (2024-22-02) ([merge request]())
+## 2.0.0 (2024-02-22) ([merge request]())
 
-#### Added (1 change)
+### Added (5 changes)
 
-- function `Serde.deser_xml()`
-- function `Serde.parse_xml()`
-- function `Serde.to_yaml()`
-- function `Serde.parse_yaml()`
-- function `Serde.deser_yaml()`
+- Function `Serde.deser_xml` for deserializing XML.
+- Function `Serde.parse_xml` for parsing XML.
+- Function `Serde.to_yaml` for converting to YAML.
+- Function `Serde.parse_yaml` for parsing YAML.
+- Function `Serde.deser_yaml` for deserializing YAML.
 
-#### Changed (1 change)
+### Changed (1 change)
 
-- Refactored tests
+- Refactored tests to improve maintainability and performance.
