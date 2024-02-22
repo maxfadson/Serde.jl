@@ -1,6 +1,5 @@
 # Par/ParQuery
 
-using Serde
 
 @testset verbose = true "ParQuery" begin
     @testset "Case №1: Cut" begin
