@@ -49,24 +49,12 @@ isunion(::Type{T}) where {T} = T isa Union
 iscomposite(::Type{T}) where {T} = !(issimple(T) || isnull(T) || isunion(T))
 
 function is_valid_union(::Type{T})::Bool where {T}
-    has_simple = false
-    has_composite = false
-    for type in Base.uniontypes(T)
-        if issimple(type)
-            has_simple = true
-        elseif iscomposite(type)
-            has_composite = true
-        end
-    end
-    return has_simple ⊻ has_composite
+    union_types = Base.uniontypes(T)
+    return any(issimple, union_types) ⊻ any(iscomposite, union_types)
 end
 
 function could_flatten(::Type{T})::Bool where {T}
-    return if issimple(T)
-        false
-    elseif isnull(T)
-        false
-    elseif iscomposite(T)
+    return if iscomposite(T)
         true
     elseif isunion(T)
         is_valid_union(T) && !isnothing(extract_composite(T))
@@ -125,9 +113,7 @@ function csv_headers(::Type{T})::Vector{String} where {T}
             throw(CsvSerializationError("Unsupported Union Type in field $name::$type of type $T."))
         end
         if could_flatten(type)
-            for header in csv_headers(extract_composite(type))
-                push!(headers, String(name) * "_" * header)
-            end
+            append!(headers, [String(name) * "_" * header for header in csv_headers(extract_composite(type))])
         else
             push!(headers, String(name))
         end
@@ -142,7 +128,7 @@ function to_csv(
     with_names::Bool = true,
 )::String where {T}
     buf = IOBuffer()
-    
+
     if with_names
         t_cols = if isempty(headers)
             csv_headers(T)
@@ -151,9 +137,7 @@ function to_csv(
         else
             throw(DimensionMismatch("The dimensions of custom headers do not match the dimensions of the output."))
         end
-
-        join(buf, t_cols, delimiter)
-        println(buf)
+        println(buf, join(t_cols, delimiter))
     end
 
     for element in data
@@ -260,7 +244,7 @@ function to_csv(
 
     with_names && (vals[1] = Dict{String,String}(cols .=> string.(cols)))
     t_cols = isempty(headers) ? sort([cols...]) : headers
-    l_cols = t_cols[end]
+    l_cols = last(t_cols)
     buf = IOBuffer()
 
     for csv_item in vals
