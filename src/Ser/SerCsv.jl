@@ -17,11 +17,9 @@ end
 const WRAPPED = Set{Char}(['"', ',', ';', '\n'])
 
 function wrap_value(s::AbstractString)
-    for i in eachindex(s)
-        if s[i] in WRAPPED
-            escaped_s = replace(s, "\"" => "\"\"")
-            return "\"$escaped_s\""
-        end
+    if any(in(WRAPPED), s)
+        escaped_s = replace(s, "\"" => "\"\"")
+        return "\"$escaped_s\""
     end
     return s
 end
@@ -54,13 +52,7 @@ function is_valid_union(::Type{T})::Bool where {T}
 end
 
 function could_flatten(::Type{T})::Bool where {T}
-    return if iscomposite(T)
-        true
-    elseif isunion(T)
-        is_valid_union(T) && !isnothing(extract_composite(T))
-    else
-        false
-    end
+    return iscomposite(T) || (isunion(T) && is_valid_union(T) && !isnothing(extract_composite(T)))
 end
 
 function extract_composite(::Type{T}) where {T}
@@ -78,7 +70,7 @@ end
 function null_count(::Type{T}) where {T}
     count = 0
     for type in fieldtypes(T)
-        count += could_flatten(type) ?  null_count(extract_composite(type)) : 1
+        count += could_flatten(type) ? null_count(extract_composite(type)) : 1
     end
     return count
 end
@@ -128,7 +120,6 @@ function to_csv(
     with_names::Bool = true,
 )::String where {T}
     buf = IOBuffer()
-
     if with_names
         t_cols = if isempty(headers)
             csv_headers(T)
@@ -139,12 +130,10 @@ function to_csv(
         end
         println(buf, join(t_cols, delimiter))
     end
-
     for element in data
         row_values(buf, element; delimiter = delimiter)
         println(buf)
     end
-
     return String(take!(buf))
 end
 
@@ -244,14 +233,13 @@ function to_csv(
 
     with_names && (vals[1] = Dict{String,String}(cols .=> string.(cols)))
     t_cols = isempty(headers) ? sort([cols...]) : headers
-    l_cols = last(t_cols)
     buf = IOBuffer()
 
     for csv_item in vals
-        for col in t_cols
+        for (i, col) in enumerate(t_cols)
             val = get(csv_item, col, nothing)
             str = val === nothing ? "" : wrap_value(string(val))
-            print(buf, str, col != l_cols ? delimiter : "\n")
+            print(buf, str, (i != length(t_cols)) ? delimiter : "\n")
         end
     end
 
