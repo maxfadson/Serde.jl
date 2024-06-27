@@ -17,11 +17,9 @@ end
 const WRAPPED = Set{Char}(['"', ',', ';', '\n'])
 
 function wrap_value(s::AbstractString)
-    for i in eachindex(s)
-        if s[i] in WRAPPED
-            escaped_s = replace(s, "\"" => "\"\"")
-            return "\"$escaped_s\""
-        end
+    if any(in(WRAPPED), s)
+        escaped_s = replace(s, "\"" => "\"\"")
+        return "\"$escaped_s\""
     end
     return s
 end
@@ -49,30 +47,12 @@ isunion(::Type{T}) where {T} = T isa Union
 iscomposite(::Type{T}) where {T} = !(issimple(T) || isnull(T) || isunion(T))
 
 function is_valid_union(::Type{T})::Bool where {T}
-    has_simple = false
-    has_composite = false
-    for type in Base.uniontypes(T)
-        if issimple(type)
-            has_simple = true
-        elseif iscomposite(type)
-            has_composite = true
-        end
-    end
-    return has_simple ⊻ has_composite
+    union_types = Base.uniontypes(T)
+    return any(issimple, union_types) ⊻ any(iscomposite, union_types)
 end
 
 function could_flatten(::Type{T})::Bool where {T}
-    return if issimple(T)
-        false
-    elseif isnull(T)
-        false
-    elseif iscomposite(T)
-        true
-    elseif isunion(T)
-        is_valid_union(T) && !isnothing(extract_composite(T))
-    else
-        false
-    end
+    return iscomposite(T) || (isunion(T) && is_valid_union(T) && !isnothing(extract_composite(T)))
 end
 
 function extract_composite(::Type{T}) where {T}
@@ -90,7 +70,7 @@ end
 function null_count(::Type{T}) where {T}
     count = 0
     for type in fieldtypes(T)
-        count += could_flatten(type) ?  null_count(extract_composite(type)) : 1
+        count += could_flatten(type) ? null_count(extract_composite(type)) : 1
     end
     return count
 end
@@ -125,9 +105,7 @@ function csv_headers(::Type{T})::Vector{String} where {T}
             throw(CsvSerializationError("Unsupported Union Type in field $name::$type of type $T."))
         end
         if could_flatten(type)
-            for header in csv_headers(extract_composite(type))
-                push!(headers, String(name) * "_" * header)
-            end
+            append!(headers, [String(name) * "_" * header for header in csv_headers(extract_composite(type))])
         else
             push!(headers, String(name))
         end
@@ -142,7 +120,6 @@ function to_csv(
     with_names::Bool = true,
 )::String where {T}
     buf = IOBuffer()
-    
     if with_names
         t_cols = if isempty(headers)
             csv_headers(T)
@@ -151,16 +128,12 @@ function to_csv(
         else
             throw(DimensionMismatch("The dimensions of custom headers do not match the dimensions of the output."))
         end
-
-        join(buf, t_cols, delimiter)
-        println(buf)
+        println(buf, join(t_cols, delimiter))
     end
-
     for element in data
         row_values(buf, element; delimiter = delimiter)
         println(buf)
     end
-
     return String(take!(buf))
 end
 
@@ -260,14 +233,13 @@ function to_csv(
 
     with_names && (vals[1] = Dict{String,String}(cols .=> string.(cols)))
     t_cols = isempty(headers) ? sort([cols...]) : headers
-    l_cols = t_cols[end]
     buf = IOBuffer()
 
     for csv_item in vals
-        for col in t_cols
+        for (i, col) in enumerate(t_cols)
             val = get(csv_item, col, nothing)
             str = val === nothing ? "" : wrap_value(string(val))
-            print(buf, str, col != l_cols ? delimiter : "\n")
+            print(buf, str, (i != length(t_cols)) ? delimiter : "\n")
         end
     end
 

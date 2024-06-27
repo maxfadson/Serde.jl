@@ -1,6 +1,6 @@
 # Ser/SerCsv
 
-@testset verbose = true "Serialization to CSV Test Suite" begin
+@testset verbose = true "SerCsv" begin
     @testset "Case 1: Simple Serialization" begin
         struct SimpleRecord
             a_id::Int64
