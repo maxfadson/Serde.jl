@@ -391,6 +391,40 @@ function default_value(::Type{T}, ::Val{x})::Nothing where {T<:Any,x}
 end
 
 """
+    Serde.null_value(::Type{T}, ::Val{x}) -> nothing
+
+This function is used to define default "null" values for field `x` of type `T`.
+Supports user overriding for custom types.
+Initially, all values are set to `nothing`.
+
+!!! note
+    This function is not used explicitly and can only be overridden for the deserialization process.
+
+See also [`Serde.isempty`](@ref), [`Serde.nulltype`](@ref), [`Serde.default_value`](@ref).
+
+## Examples:
+Let's make a custom type `Count` with the field `cnt` that can be of type `Notning`
+```julia
+struct Count
+    cnt::Union{Nothing,Int64}
+end
+```
+Now, we can define a new method `Serde.null_value` for the type `Count` and its field `cnt`.
+```julia
+function Serde.null_value(::Type{Count}, ::Val{:cnt})
+    return 5
+end
+```
+After this, if we try to deserialize a dictionary with key `cnt` equal to 5, it will have a `Notning` value due to cnt value being equal to null_value function.
+.julia> Serde.deser(Count, Dict{String,Any}("cnt" => 5))
+Count(nothing)
+```
+"""
+function null_value(::Type{T}, ::Val{x})::Nothing where {T<:Any,x}
+    return nothing
+end
+
+"""
     Serde.isempty(::Type{T}, x) -> false
 
 This function determines the condition under which the passed value `x` for some custom type `T` can be treated as `nothing`.
@@ -524,7 +558,10 @@ function deser(
     for (type, name) in zip(_field_types(D), fieldnames(D))
         key = custom_name(D, Val(name))
         val = get(data, K(key), default_value(D, Val(name)))
-        val = isnothing(val) || ismissing(val) || isempty(D, val) ? nulltype(type) : val
+        val = isnothing(val) ||
+             ismissing(val) ||
+             isempty(D, val) ||
+             (val == null_value(D, Val(name))) ? nulltype(type) : val
         push!(vals, eldeser(D, type, key, val))
     end
 
@@ -537,7 +574,10 @@ function deser(::CustomType, ::Type{D}, data::N)::D where {D<:Any,N<:NamedTuple}
     for (type, name) in zip(_field_types(D), fieldnames(D))
         key = custom_name(D, Val(name))
         val = get(data, key, default_value(D, Val(name)))
-        val = isnothing(val) || ismissing(val) || isempty(D, val) ? nulltype(type) : val
+        val = isnothing(val) ||
+             ismissing(val) ||
+             isempty(D, val) ||
+             (val == null_value(D, Val(name))) ? nulltype(type) : val
         push!(vals, eldeser(D, type, key, val))
     end
 
