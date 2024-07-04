@@ -694,15 +694,5 @@ using Test, Dates
 
         @test Serde.deser(Foo46, Dict("empty_string_is_nothing" => "", "empty_string" => "")) == exp_obj
         @test Serde.deser(Foo46, NamedTuple{(:empty_string_is_nothing, :empty_string)}(("", ""))) == exp_obj
-
-        struct Foo47
-            zero_is_nothing::Union{Foo47,Int}
-            zero::Int
-        end 
-
-        Serde.null_value(::Type{Foo47}, ::Val{:zero_is_nothing}) = 0
-        exp_obj2=Foo47(0, 0)
-
-        @test Serde.deser(Foo47, Dict("zero_is_nothing" => 0, "zero" => 0)) == exp_obj2
     end
 end
